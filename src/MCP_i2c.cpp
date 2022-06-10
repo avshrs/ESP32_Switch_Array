@@ -8,13 +8,17 @@ void MCP_i2c::i2c_init(uint8_t bus, uint8_t address_)
     
     address = address_;
     mcp_bus = bus;
+    int sda = 33;
+    int scl = 32;
+    int sda2 = 18;
+    int scl2 = 19;
     if (mcp_bus == 1)
     {
-        Wire.begin();
+        Wire.begin(sda, scl);
     }
     else if(mcp_bus == 2)
     {
-        Wire1.begin();
+        Wire1.begin(sda2, scl2);
     }
 }
 
@@ -27,7 +31,7 @@ uint8_t MCP_i2c::readByte(uint8_t reg)
         Wire.requestFrom(reg, 1);
         Wire.readBytes(buf, 1);
         Wire.endTransmission();
-        
+
     }
     else if(mcp_bus == 2)
     {

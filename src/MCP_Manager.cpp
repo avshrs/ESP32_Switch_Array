@@ -1,9 +1,21 @@
 #include "MCP_Manager.h"
-#include "MCP_config.h"
 
 
 void MCP_Manager::MCP_Init(){
-    
+    MCP_I2C_CONFIG in_i2c_1 = {1, "in", 0x24};
+    MCP_I2C_CONFIG in_i2c_2 = {1, "in", 0x25};
+    MCP_I2C_CONFIG in_i2c_3 = {1, "in", 0x26};
+    MCP_I2C_CONFIG in_i2c_4 = {1, "in", 0x27};
+
+    MCP_I2C_CONFIG out_i2c_1 = {1, "in", 0x20};
+    MCP_I2C_CONFIG out_i2c_2 = {1, "in", 0x21}; 
+    MCP_I2C_CONFIG out_i2c_3 = {1, "in", 0x22}; 
+    MCP_I2C_CONFIG out_i2c_4 = {1, "in", 0x23}; 
+    MCP_I2C_CONFIG out_i2c_5 = {2, "in", 0x20}; 
+    MCP_I2C_CONFIG out_i2c_6 = {2, "in", 0x21}; 
+    MCP_I2C_CONFIG out_i2c_7 = {2, "in", 0x22}; 
+    MCP_I2C_CONFIG out_i2c_8 = {2, "in", 0x23}; 
+
     mcpc_in_0.MCP_Init(in_i2c_1.bus, in_i2c_1.address, MCP_IN, MCP_PULLUP, MCP_IN, MCP_PULLUP);
     mcpc_in[0]= &mcpc_in_0;
 
@@ -37,13 +49,19 @@ void MCP_Manager::MCP_Init(){
 
  }
 
+
+void MCP_Manager::register_mcp_config(MCP_CONFIG *config)
+{
+    mcp_config = config;
+}
+
 void MCP_Manager::update_io()
 {
     for(int i=0; i < static_cast<int>(mcp_config->get_output_len());i++)
     {
         if(mcp_config->get_out_enabled(i))
         {
-            if (mcp_config->get_out_def_state(i))
+            if (mcp_config->get_out_define_state(i))
             {
                 write_output(i, true, 998);
             }
@@ -58,7 +76,7 @@ void MCP_Manager::update_io()
         if(mcp_config->get_in_enabled(i))
         {
             in_states[i] = read_input_direct(i);   
-            mqtt->pub_in_state(i, in_states[i]);             
+            // mqtt->pub_in_state(i, in_states[i]);             
             if (mcp_config->get_in_enabledOutputRelated(i))
             {
                 int out = mcp_config->get_in_output_related(i);
@@ -72,12 +90,8 @@ void MCP_Manager::update_io()
     
 }
 
-void MCP_Manager::register_mcp_config(MCP_rw_config *mcp_config_){
-    mcp_config = mcp_config_; 
-}
-void MCP_Manager::register_mcp_mqtt(mqtt_client *mqtt_){
-    mqtt = mqtt_;
-}
+
+
 
 void MCP_Manager::scan_all_inputs(){
     for(int in = 0; in < static_cast<int>(mcp_config->get_input_len()) ; in++){
@@ -85,7 +99,7 @@ void MCP_Manager::scan_all_inputs(){
             bool value = read_input_direct(in);
             if (in_states[in] != value){
                 in_states[in] = value;
-                mqtt->pub_in_state(in, value);
+                // mqtt->pub_in_state(in, value);
                 int out = mcp_config->get_in_output_related(in);
                 if (mcp_config->get_in_enabledOutputRelated(in)){
                     write_output(static_cast<uint8_t>(out), value, in);
@@ -97,25 +111,6 @@ void MCP_Manager::scan_all_inputs(){
 }
 
 
-// for(const auto& conf : configs){
-//     config.name
-// }
-
-void MCP_Manager::write_output_timer(int output, unsigned int timeout, bool twilight_force=false){
-    try{
-        if(in_states[31] || twilight_force){
-            if (out_states_forced[output] > 0){
-                out_states_forced[output] = timeout;
-            }
-            else{
-            std::thread(&MCP_Manager::change_state, this, output, timeout).detach();
-            }
-        }
-    }
-    catch (const std::exception& e) { 
-        std::cout << e.what() << std::endl;
-    }
-}
 
 void MCP_Manager::change_state(int output, unsigned int timeout){
     if (!read_output_buffer(output)){
@@ -134,33 +129,16 @@ void MCP_Manager::write_output(int output, bool value, int in = 999){
         if (!mcp_config->get_out_bistable(output) && out_states[output] != value){
             out_states[output] = value;
             write_output_direct(output, value);
-            auto t = std::time(nullptr);
-            auto tm = *std::localtime(&t);
-            std::cout << std::put_time(&tm, "%d-%m-%Y %H-%M-%S | ");
-            std::cout <<"MO -";
-            std::cout <<mcp_config->get_in_name(in);
-            std::cout <<" in:"<<unsigned(in)<<" - ";
-            std::cout << mcp_config->get_out_name(output);
-            std::cout <<" out:"<<unsigned(output)<<" - val:";
-            std::cout  <<unsigned(value)<<std::endl;
         }
         else if (mcp_config->get_out_bistable(output)){
             if (out_states[output] > 0 && value > 0){
                 
                 out_states[output] = false;
                 write_output_direct(output, false);
-                auto t = std::time(nullptr);
-                auto tm = *std::localtime(&t);
-                std::cout << std::put_time(&tm, "%d-%m-%Y %H-%M-%S | ");
-                std::cout<<"BI -"<<mcp_config->get_in_name(in)<<" in:"<<unsigned(in)<<" - "<<mcp_config->get_out_name(output)<<" out:"<<unsigned(output)<<" - val:"<<unsigned(false)<<std::endl;
             }
             else if (value > 0){
                 out_states[output] = true;
                 write_output_direct(output, true);
-                auto t = std::time(nullptr);
-                auto tm = *std::localtime(&t);
-                std::cout << std::put_time(&tm, "%d-%m-%Y %H-%M-%S | ");
-                std::cout<<"BI -"<<mcp_config->get_in_name(in)<<" in:"<<unsigned(in)<<" - "<<mcp_config->get_out_name(output)<<" out:"<<unsigned(output)<<" - val:"<<unsigned(true)<<std::endl;
             }
         }
     }
@@ -183,7 +161,7 @@ bool MCP_Manager::read_input_buffer(uint8_t input){
 
 void MCP_Manager::write_output_direct(uint8_t out, bool state){
     bool value = state;
-    if (mcp_config->get_out_def_state(out)){
+    if (mcp_config->get_out_define_state(out)){
         if (state){
             value = false; 
         }
@@ -191,7 +169,7 @@ void MCP_Manager::write_output_direct(uint8_t out, bool state){
             value = true;
         }
     }
-    mqtt->pub_out_state(out, state);
+    // mqtt->pub_out_state(out, state);
     MCP_Data mcp_data = get_address(out);
     out_states_real[out] = state;
     mcpc_out[mcp_data.chipset]->writeRaw(mcp_data.side, mcp_data.io, value);

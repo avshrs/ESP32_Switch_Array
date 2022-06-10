@@ -1,5 +1,6 @@
 #pragma once
 #include <Wire.h>
+#include <Arduino.h>
 
 class MCP_i2c{
     private:

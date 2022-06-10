@@ -1,6 +1,9 @@
+#pragma once
+
 #include <Arduino.h>
 #include <PubSubClient.h>
 #include <WiFi.h>
+#include "passwd.h"
 
 
 #define MSG_BUFFER_SIZE	(50)
@@ -22,35 +25,8 @@ unsigned long old_mils = 60000;
 
 
 
-String make_discover(char* dev_type_, char* dev_name_, char *dev_name_ha, char * sens_name, char * unique_id, String entity_settings)
-{
-String md = (String)"{\"avty\":{\"topic\":\"avshrs/devices/" + (String)dev_name_ ;
-md += (String)"/status/connected\",\"payload_available\":\"true\",\"payload_not_available\":\"false\"},\"~\":\"avshrs/devices/"+(String)dev_name_+"\",";
-md += (String)"\"device\":{\"ids\":\"" + (String)dev_name_ + (String)"\",\"mf\":\"Avshrs\",\"name\":\""+ (String)dev_name_ha + (String)"\",\"sw\":\"0.0.1\"},";
-md += (String)"\"name\":\""+ (String)sens_name + (String)"\",\"uniq_id\":\""+ (String)unique_id + "\",\"qos\":0," ;
-md += (String)entity_settings;
-return md;
-}
 
 
-void prepare_conf()
-{   
-    String s1 = "\"command_topic\":\"~/set/door\",\"position_topic\":\"~/state/door\",\"device_class\":\"garage\"}";
-    String s1_ = make_discover("cover", "switch_array_01", "SupraMatic3-01", "Garage door", "switch_array_01",s1);
-    client.publish("homeassistant/cover/switch_array_01/config", s1_.c_str(), true);
-
-    String s4 = "\"command_topic\":\"~/set/venting\",\"state_topic\":\"~/state/venting\",\"payload_on\":\"venting\",\"payload_off\":\"close\",\"state_on\":\"venting\",\"state_off\":\"closed\"}";
-    String s4_ = make_discover("switch", "switch_array_01", "SupraMatic3-01", "Garage door venting", "hormann_garage_wenting_switch_door_01",s4);
-    client.publish("homeassistant/switch/hormann_garage_door_venting_switch_01/config", s4_.c_str(), true);
-
-    String s3 = "\"state_topic\":\"~/state/state\"}";
-    String s3_ = make_discover("sensor", "switch_array_01", "SupraMatic3-01", "Garage door State", "hormann_garage_state_door_01",s3);
-    client.publish("homeassistant/sensor/hormann_garage_door_state_01/config", s3_.c_str(), true);
-   
-    String s5 = "\"command_topic\":\"~/set/light\",\" payload_press\":\"light\"}";
-    String s5_ = make_discover("button", "switch_array_01", "SupraMatic3-01", "Garage door Light", "hormann_garage_light_door_01",s5);
-    client.publish("homeassistant/button/hormann_garage_door_light_01/config", s5_.c_str(), true);
-}   
 
 
 void reconnect() 
