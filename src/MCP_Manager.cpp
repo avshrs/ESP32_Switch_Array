@@ -2,19 +2,23 @@
 
 
 void MCP_Manager::MCP_Init(){
-    MCP_I2C_CONFIG in_i2c_1 = {1, "in", 0x24};
-    MCP_I2C_CONFIG in_i2c_2 = {1, "in", 0x25};
-    MCP_I2C_CONFIG in_i2c_3 = {1, "in", 0x26};
-    MCP_I2C_CONFIG in_i2c_4 = {1, "in", 0x27};
 
-    MCP_I2C_CONFIG out_i2c_1 = {1, "in", 0x20};
-    MCP_I2C_CONFIG out_i2c_2 = {1, "in", 0x21}; 
-    MCP_I2C_CONFIG out_i2c_3 = {1, "in", 0x22}; 
-    MCP_I2C_CONFIG out_i2c_4 = {1, "in", 0x23}; 
-    MCP_I2C_CONFIG out_i2c_5 = {2, "in", 0x20}; 
-    MCP_I2C_CONFIG out_i2c_6 = {2, "in", 0x21}; 
-    MCP_I2C_CONFIG out_i2c_7 = {2, "in", 0x22}; 
-    MCP_I2C_CONFIG out_i2c_8 = {2, "in", 0x23}; 
+    
+    char in[] = "in";
+    char out[] = "out";
+    MCP_I2C_CONFIG in_i2c_1 = {1, in, 0x24};
+    MCP_I2C_CONFIG in_i2c_2 = {1, in, 0x25};
+    MCP_I2C_CONFIG in_i2c_3 = {1, in, 0x26};
+    MCP_I2C_CONFIG in_i2c_4 = {1, in, 0x27};
+
+    MCP_I2C_CONFIG out_i2c_1 = {1, out, 0x20};
+    MCP_I2C_CONFIG out_i2c_2 = {1, out, 0x21}; 
+    MCP_I2C_CONFIG out_i2c_3 = {1, out, 0x22}; 
+    MCP_I2C_CONFIG out_i2c_4 = {1, out, 0x23}; 
+    MCP_I2C_CONFIG out_i2c_5 = {2, out, 0x20}; 
+    MCP_I2C_CONFIG out_i2c_6 = {2, out, 0x21}; 
+    MCP_I2C_CONFIG out_i2c_7 = {2, out, 0x22}; 
+    MCP_I2C_CONFIG out_i2c_8 = {2, out, 0x23}; 
 
     mcpc_in_0.MCP_Init(in_i2c_1.bus, in_i2c_1.address, MCP_IN, MCP_PULLUP, MCP_IN, MCP_PULLUP);
     mcpc_in[0]= &mcpc_in_0;
@@ -100,7 +104,7 @@ void MCP_Manager::scan_all_inputs(){
             bool value = read_input_direct(in);
             if (in_states[in] != value){
                 
-                String topic = "avshrs/devices/switch_array_01/" + (String)in + "/state";
+                String topic = "avshrs/devices/switch_array_01/in_" + (String)in + "/state";
                 String msg = (String)value; 
                 in_states[in] = value;
                 

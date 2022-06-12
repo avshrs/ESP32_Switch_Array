@@ -4,7 +4,8 @@
 #include <PubSubClient.h>
 #include <WiFi.h>
 #include "passwd.h"
-
+#include "Esp.h"
+EspClass ESP2;
 
 #define MSG_BUFFER_SIZE	(50)
 char msg[MSG_BUFFER_SIZE];
@@ -47,14 +48,7 @@ void reconnect()
             {
                 Serial.println("connected to MQTT server");
                 // MQTT subscription
-                client.subscribe("avshrs/devices/switch_array_01/set/door");                
-                client.subscribe("avshrs/devices/switch_array_01/set/light");
-                client.subscribe("avshrs/devices/switch_array_01/set/venting");
 
-                client.subscribe("avshrs/devices/switch_array_01/esp_led");
-
-                client.subscribe("avshrs/devices/switch_array_01/set/delay_msg");
-                client.subscribe("avshrs/devices/switch_array_01/set/debug");
                 // prepare_conf();
 
             } 
@@ -75,7 +69,7 @@ String uptime(unsigned long milli)
   String ret =  _return;
   return ret;
 }
-
+     
 
 void wifi_status()
 {
@@ -90,6 +84,25 @@ void wifi_status()
     client.publish("avshrs/devices/switch_array_01/status/wifi_signal_strength", msg);
     
     client.publish("avshrs/devices/switch_array_01/status/uptime", uptime(currentMillis).c_str());
+
+    snprintf (msg, MSG_BUFFER_SIZE, "%i", ESP2.getFreeHeap());
+    client.publish("avshrs/devices/switch_array_01/status/FreeHeap", msg);
+
+    snprintf (msg, MSG_BUFFER_SIZE, "%i", ESP2.getHeapSize());
+    client.publish("avshrs/devices/switch_array_01/status/HeapSize", msg);
+
+    snprintf (msg, MSG_BUFFER_SIZE, "%i", ESP2.getMinFreeHeap());
+    client.publish("avshrs/devices/switch_array_01/status/MinFreeHeap", msg);
+
+    snprintf (msg, MSG_BUFFER_SIZE, "%i", ESP2.getMaxAllocHeap());
+    client.publish("avshrs/devices/switch_array_01/status/MaxAllocHeap", msg);
+    
+    snprintf (msg, MSG_BUFFER_SIZE, "%i", ESP2.getMaxAllocHeap());
+    client.publish("avshrs/devices/switch_array_01/status/MaxAllocHeap", msg);
+
+    client.publish("avshrs/devices/switch_array_01/status/ChipModel", ESP2.getChipModel());
+
+
 }
 
 void setup_wifi() 

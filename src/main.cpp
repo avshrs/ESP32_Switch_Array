@@ -3,10 +3,10 @@
 #include "MCP_Manager.h"
 #include "MCP_config.h"
 // #include "Esp32MQTTClient.h"
-#include "Esp.h"
-EspClass ESP2;
+
 int d = 1; 
-unsigned long previousMillis = 0;  
+unsigned long previousMillis = 60001;  
+unsigned long previousMillis2 = 600001;  
 String state = "n/a";
 MCP_Manager mcp; 
 MCP_CONFIG mcp_config; 
@@ -26,7 +26,7 @@ void publish_mqtt_discover()
     {
         if(mcp_config.get_in_enabled(i))
         {
-            String binary_sensor = "\"state_topic\":\"~/"+ (String)i+"/state\",\"device_class\":\"";
+            String binary_sensor = "\"state_topic\":\"~/in_"+ (String)i+"/state\",\"device_class\":\"";
             binary_sensor += mcp_config.get_in_dev_class(i);
             binary_sensor += "\"}";
             String binary_sensor_ = make_discover_json("binary_sensor", "switch_array_01", "AvsHrs-01", mcp_config.get_in_name(i), mcp_config.get_in_unique_id(i)+(String)"_01", binary_sensor);
@@ -42,7 +42,7 @@ void publish_mqtt_discover()
     {
         if(mcp_config.get_out_enabled(i))
         {
-            String switch_dev = "\"command_topic\":\"~/"+ (String)i +"/set_state\",\"state_topic\":\"~/"+ (String)i+"/state\",\"device_class\":\"";
+            String switch_dev = "\"command_topic\":\"~/out_"+ (String)i +"/set_state\",\"state_topic\":\"~/out_"+ (String)i+"/state\",\"device_class\":\"";
             switch_dev += mcp_config.get_out_dev_class(i);
             switch_dev += "\"}";
             String switch_dev_ = make_discover_json("switch", "switch_array_01", "AvsHrs-01", mcp_config.get_out_name(i), mcp_config.get_out_unique_id(i)+(String)"_01", switch_dev);
@@ -56,6 +56,21 @@ void publish_mqtt_discover()
     }
 }
 
+void subscribe_switches()
+{
+    for(int i = 0; i < (int)mcp_config.get_output_len(); i++)
+    {
+        if(mcp_config.get_out_enabled(i))
+        {
+            String topic = "avshrs/devices/switch_array_01/out_" + (String)i + (String)"/set_state";
+
+            client.subscribe(topic.c_str());
+        }
+   
+    }
+
+}
+
 void callback(char* topic, byte* payload, unsigned int length) 
 {
     Serial.print("Message arrived [");
@@ -67,6 +82,7 @@ void callback(char* topic, byte* payload, unsigned int length)
         st +=(char)payload[i];
     }
     Serial.println();
+
 }
 
 void setup() 
@@ -86,8 +102,7 @@ void setup()
     mcp.MCP_Init();
     mcp.register_mqtt_client(&client);
     mcp.update_io();
-
-
+    delay(1000);
 }
 
 
@@ -98,43 +113,34 @@ void loop()
     if (!client.connected()) 
     {
         reconnect();
-        
+        if(client.connected())
+        {
+            subscribe_switches();
+            publish_mqtt_discover();
+        }
     }
     
     if (currentMillis - previousMillis >= 60000) 
     {
         previousMillis = currentMillis;
+        wifi_status();
 
+
+    }
+
+    if (currentMillis - previousMillis2 >= 600000) 
+    {
+        previousMillis2 = currentMillis;
         client.publish("avshrs/devices/switch_array_01/status/connected", "true");
         publish_mqtt_discover();
-        Serial.print("ESP2.getHeapSize(); ");
-        Serial.println(ESP2.getHeapSize());
-        Serial.print("ESP2.getFreeHeap(); ");
-        Serial.println(ESP2.getFreeHeap());
-        Serial.print("ESP2.getMinFreeHeap(); ");
-        Serial.println(ESP2.getMinFreeHeap());
-        Serial.print("ESP2.getMaxAllocHeap(); ");
-        Serial.println(ESP2.getMaxAllocHeap());
-        Serial.print("ESP2.getPsramSize(); ");
-        Serial.println(ESP2.getPsramSize());
-        Serial.print("ESP2.getChipRevision(); ");
-        Serial.println(ESP2.getChipRevision());
-        Serial.print("ESP2.getChipModel(); ");
-        Serial.println(ESP2.getChipModel());
-        Serial.print("ESP2.getChipCores(); ");
-        Serial.println(ESP2.getChipCores());
-        Serial.print("ESP2.getCpuFreqMHz(); ");
-        Serial.println(ESP2.getCpuFreqMHz());
-                Serial.print("ESP2.getCycleCount(); ");
-        Serial.println(ESP2.getCycleCount());
-                Serial.print("ESP2.getSdkVersion(); ");
-        Serial.println(ESP2.getSdkVersion());
-                Serial.print("ESP2.getFlashChipSize(); ");
-        Serial.println(ESP2.getFlashChipSize());
+        Serial.println("in serice if- main");
     }
     
+    Serial.println("before client loop");
     client.loop();
+    Serial.println("after client loop");
+    Serial.println("before scan loop");
     mcp.scan_all_inputs();
-    
+    Serial.println("after scan loop");
     
 }
