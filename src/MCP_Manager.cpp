@@ -54,7 +54,10 @@ void MCP_Manager::register_mcp_config(MCP_CONFIG *config)
 {
     mcp_config = config;
 }
-
+void MCP_Manager::register_mqtt_client(PubSubClient *client_)
+{
+    client = client_;
+}
 void MCP_Manager::update_io()
 {
     for(int i=0; i < static_cast<int>(mcp_config->get_output_len());i++)
@@ -91,22 +94,24 @@ void MCP_Manager::update_io()
 }
 
 
-
-
 void MCP_Manager::scan_all_inputs(){
     for(int in = 0; in < static_cast<int>(mcp_config->get_input_len()) ; in++){
         if (mcp_config->get_in_enabled(in)){
             bool value = read_input_direct(in);
             if (in_states[in] != value){
+                
+                String topic = "avshrs/devices/switch_array_01/" + (String)in + "/state";
+                String msg = (String)value; 
                 in_states[in] = value;
-                // mqtt->pub_in_state(in, value);
+                
+                client->publish(topic.c_str(), msg.c_str());
                 int out = mcp_config->get_in_output_related(in);
                 if (mcp_config->get_in_enabledOutputRelated(in)){
                     write_output(static_cast<uint8_t>(out), value, in);
                 }
             }
         }
-        usleep(100);
+        
     }
 }
 

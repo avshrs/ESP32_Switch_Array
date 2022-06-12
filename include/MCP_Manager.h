@@ -4,7 +4,7 @@
 #include "MCPdev.h"
 #include "vars.h"
 #include "MCP_config.h"
-// class MCP_CONFIG;
+#include "PubSubClient.h"
 
 class MCP_Manager
 {
@@ -16,7 +16,7 @@ class MCP_Manager
         MCP mcpc_in_2;
         MCP mcpc_in_3;
         MCP_CONFIG *mcp_config;
-
+        PubSubClient *client;
         MCP *mcpc_out[9];
         MCP mcpc_out_0;
         MCP mcpc_out_1;
@@ -32,7 +32,6 @@ class MCP_Manager
         bool in_states[128] = {true};
         bool out_states_real[128] = {false};
         bool out_states[128] = {false};
-        bool alarm_armed = false;
         uint8_t out_states_forced[128] = {false};
         
     public:
@@ -46,6 +45,8 @@ class MCP_Manager
         void write_output(int output, bool value, int input);
         void update_io();
         void register_mcp_config(MCP_CONFIG *config);
+        void register_mqtt_client(PubSubClient *client);
+        
         void write_output_timer(int output, unsigned int timeout, bool twilight_force);
     
     private:

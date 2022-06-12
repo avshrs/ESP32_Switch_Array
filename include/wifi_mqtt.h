@@ -39,7 +39,7 @@ void reconnect()
             old_mils = millis();
             Serial.print("Attempting MQTT connection...");
             // Create a random client ID
-            String clientId = "ESP_hormann_gate";
+            String clientId = "ESP_Avshrs_switch_gate";
             
             clientId += String(random(0xffff), HEX);
             // Attempt to connect

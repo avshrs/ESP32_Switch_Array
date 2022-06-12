@@ -2,7 +2,9 @@
 #include "wifi_mqtt.h"
 #include "MCP_Manager.h"
 #include "MCP_config.h"
-
+// #include "Esp32MQTTClient.h"
+#include "Esp.h"
+EspClass ESP2;
 int d = 1; 
 unsigned long previousMillis = 0;  
 String state = "n/a";
@@ -71,9 +73,7 @@ void setup()
 {
     Serial.begin(1000000);
     
-    mcp_config.init();
-    mcp.register_mcp_config(&mcp_config);
-
+    
     pinMode(BUILTIN_LED, OUTPUT);  
     digitalWrite(BUILTIN_LED, LOW);   
     setup_wifi();
@@ -81,7 +81,13 @@ void setup()
     client.setServer(mqtt_server, 1883);
     client.setBufferSize(2048);
     client.setCallback(callback);
-    
+    mcp_config.init();
+    mcp.register_mcp_config(&mcp_config);
+    mcp.MCP_Init();
+    mcp.register_mqtt_client(&client);
+    mcp.update_io();
+
+
 }
 
 
@@ -92,9 +98,43 @@ void loop()
     if (!client.connected()) 
     {
         reconnect();
-        publish_mqtt_discover();
+        
     }
+    
+    if (currentMillis - previousMillis >= 60000) 
+    {
+        previousMillis = currentMillis;
+
+        client.publish("avshrs/devices/switch_array_01/status/connected", "true");
+        publish_mqtt_discover();
+        Serial.print("ESP2.getHeapSize(); ");
+        Serial.println(ESP2.getHeapSize());
+        Serial.print("ESP2.getFreeHeap(); ");
+        Serial.println(ESP2.getFreeHeap());
+        Serial.print("ESP2.getMinFreeHeap(); ");
+        Serial.println(ESP2.getMinFreeHeap());
+        Serial.print("ESP2.getMaxAllocHeap(); ");
+        Serial.println(ESP2.getMaxAllocHeap());
+        Serial.print("ESP2.getPsramSize(); ");
+        Serial.println(ESP2.getPsramSize());
+        Serial.print("ESP2.getChipRevision(); ");
+        Serial.println(ESP2.getChipRevision());
+        Serial.print("ESP2.getChipModel(); ");
+        Serial.println(ESP2.getChipModel());
+        Serial.print("ESP2.getChipCores(); ");
+        Serial.println(ESP2.getChipCores());
+        Serial.print("ESP2.getCpuFreqMHz(); ");
+        Serial.println(ESP2.getCpuFreqMHz());
+                Serial.print("ESP2.getCycleCount(); ");
+        Serial.println(ESP2.getCycleCount());
+                Serial.print("ESP2.getSdkVersion(); ");
+        Serial.println(ESP2.getSdkVersion());
+                Serial.print("ESP2.getFlashChipSize(); ");
+        Serial.println(ESP2.getFlashChipSize());
+    }
+    
     client.loop();
-    mcp.MCP_Init();
+    mcp.scan_all_inputs();
+    
     
 }
