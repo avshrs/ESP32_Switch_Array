@@ -28,7 +28,7 @@ void publish_mqtt_discover()
         {
             String binary_sensor = "\"state_topic\":\"~/state/in_"+ (String)i + "\",\"payload_on\":\"ON\",\"payload_off\":\"OFF\",\"device_class\":\"";
             binary_sensor += mcp_config.get_in_dev_class(i) + "\"}";
-            String binary_sensor_ = make_discover_json("binary_sensor", "switch_array_01", "AvsHrs-01", mcp_config.get_in_name(i), mcp_config.get_in_unique_id(i)+(String)"_01", binary_sensor);
+            String binary_sensor_ = make_discover_json("binary_sensor", "switch_array_01", "AvsHrs-01", mcp_config.get_in_name(i), mcp_config.get_in_unique_id(i), binary_sensor);
             String topic = "homeassistant/binary_sensor/switch_array_01/" + mcp_config.get_in_unique_id(i) + "/config";
             client.publish(topic.c_str(), binary_sensor_.c_str(), true);
         }
@@ -52,7 +52,7 @@ void publish_mqtt_discover()
             }
                 
             
-            String switch_dev_ = make_discover_json("switch", "switch_array_01", "AvsHrs-01", mcp_config.get_out_name(i), mcp_config.get_out_unique_id(i)+(String)"_01", switch_dev);
+            String switch_dev_ = make_discover_json("switch", "switch_array_01", "AvsHrs-01", mcp_config.get_out_name(i), mcp_config.get_out_unique_id(i)+(String), switch_dev);
             String topic = "homeassistant/" + mcp_config.get_out_dev_group(i) + "/switch_array_01/";
             topic +=  mcp_config.get_out_unique_id(i);
             topic +=  "/config";
