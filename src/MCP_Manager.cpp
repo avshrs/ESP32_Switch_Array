@@ -49,7 +49,7 @@ void MCP_Manager::MCP_Init(){
     mcpc_out[6] = &mcpc_out_6;
     mcpc_out_7.MCP_Init(out_i2c_8.bus, out_i2c_8.address, MCP_OUT, MCP_NOT_PULLUP, MCP_OUT, MCP_NOT_PULLUP); 
     mcpc_out[7] = &mcpc_out_7; 
-    
+    Serial.println("I2C devices initialized");
 
  }
 
@@ -57,13 +57,16 @@ void MCP_Manager::MCP_Init(){
 void MCP_Manager::register_mcp_config(MCP_CONFIG *config)
 {
     mcp_config = config;
+     Serial.println("Config mamanger regisered");
 }
 void MCP_Manager::register_mqtt_client(PubSubClient *client_)
 {
     client = client_;
+     Serial.println("MQTT client registered");
 }
 void MCP_Manager::update_io()
 {   
+    Serial.println("Hadware outputs state update");
     for(int i=0; i < static_cast<int>(mcp_config->get_output_len());i++)
     {
         if(mcp_config->get_out_enabled(i))
@@ -78,6 +81,7 @@ void MCP_Manager::update_io()
             }
         }
     }    
+    Serial.println("Hadware inputs state update");
     for(int i=0; i < static_cast<int>(mcp_config->get_input_len());i++)
     {
         if(mcp_config->get_in_enabled(i))
@@ -205,18 +209,14 @@ void MCP_Manager::write_output_direct(uint8_t out, bool state){
             value = true;
         }
     }
-    
+    // mqtt->pub_out_state(out, state);
     MCP_Data mcp_data = get_address(out);
     out_states_real[out] = state;
     mcpc_out[mcp_data.chipset]->writeRaw(mcp_data.side, mcp_data.io, value);
-    if (value)
-    {
+    if(state)
         client->publish(topic.c_str(), "ON");
-    }
     else
-    {
         client->publish(topic.c_str(), "OFF");
-    }
 }
 
 MCP_Data MCP_Manager::get_address(uint8_t io){

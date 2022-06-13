@@ -1,4 +1,4 @@
-#include "passwd.h"
+
 #include "wifi_mqtt.h"
 #include "MCP_Manager.h"
 #include "MCP_config.h"
@@ -37,9 +37,19 @@ void publish_mqtt_discover()
     {
         if(mcp_config.get_out_enabled(i))
         {
-            String switch_dev = "\"command_topic\":\"~/set_state/out_"+ (String)i + "\",\"state_topic\":\"~/state/out_"+ (String)i + "\",\"device_class\":\"";
-            switch_dev += mcp_config.get_out_dev_class(i);
-            switch_dev += "\"}";
+            if(mcp_config.get_out_dev_group(i) == "lock")
+            {
+                String switch_dev = "\"command_topic\":\"~/set_state/out_"+ (String)i + "\",\"state_topic\":\"~/state/out_"+ (String)i + "\"}";
+            }
+                
+            else
+            {
+                String switch_dev = "\"command_topic\":\"~/set_state/out_"+ (String)i + "\",\"state_topic\":\"~/state/out_"+ (String)i + "\",\"device_class\":\"";
+                switch_dev += mcp_config.get_out_dev_class(i);
+                switch_dev += "\"}";
+            }
+                
+            
             String switch_dev_ = make_discover_json("switch", "switch_array_01", "AvsHrs-01", mcp_config.get_out_name(i), mcp_config.get_out_unique_id(i)+(String)"_01", switch_dev);
             String topic = "homeassistant/" + mcp_config.get_out_dev_group(i) + "/switch_array_01/";
             topic +=  mcp_config.get_out_unique_id(i);
@@ -108,19 +118,26 @@ void setup()
 
     pinMode(BUILTIN_LED, OUTPUT);  
     digitalWrite(BUILTIN_LED, LOW);   
+
     setup_wifi();
 
     client.setServer(mqtt_server, 1883);
     client.setBufferSize(2048);
     client.setCallback(callback);
+
+    reconnect();
+
+    // scan_i2c();
+
     mcp_config.init();
     mcp.register_mcp_config(&mcp_config);
-    mcp.MCP_Init();
     mcp.register_mqtt_client(&client);
-    mcp.update_io();
-    delay(1000);
-    
+    mcp.MCP_Init();
    
+    subscribe_switches();
+    publish_mqtt_discover();
+    
+    mcp.update_io();
 
 }
 
@@ -132,12 +149,7 @@ void loop()
     if (!client.connected()) 
     {
         reconnect();
-        if(client.connected())
-        {
-            subscribe_switches();
-            publish_mqtt_discover();
-            scan_i2c();
-        }
+    
     }
     
     if (currentMillis - previousMillis >= 60000) 
@@ -147,14 +159,6 @@ void loop()
         client.publish("avshrs/devices/switch_array_01/status/connected", "true");
 
     }
-
-    // if (currentMillis - previousMillis2 >= 600000) 
-    // {
-    //     previousMillis2 = currentMillis;
-    //     publish_mqtt_discover();
-        
-    // }
-    
     client.loop();
     mcp.scan_all_inputs();
     
