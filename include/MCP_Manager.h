@@ -42,7 +42,7 @@ class MCP_Manager
         bool read_output_buffer(uint8_t output);
         bool read_input_buffer(uint8_t input);
         void scan_all_inputs();
-        void write_output(int output, bool value, int input);
+        void write_output(int output, bool value, int input, bool force);
         void update_io();
         void register_mcp_config(MCP_CONFIG *config);
         void register_mqtt_client(PubSubClient *client);

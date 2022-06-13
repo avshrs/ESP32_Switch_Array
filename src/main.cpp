@@ -93,9 +93,9 @@ void callback(char* topic, byte* payload, unsigned int length)
     {
         String nr = tp.substring(tp.indexOf("out_")+4);
         if (st == "ON")
-            mcp.write_output(int(nr.toInt()), true, 999);
+            mcp.write_output(int(nr.toInt()), true, 999, false);
         else if (st == "OFF")
-            mcp.write_output(int(nr.toInt()), false, 999);
+            mcp.write_output(int(nr.toInt()), false, 999, false);
     }
 
     

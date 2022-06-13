@@ -73,11 +73,11 @@ void MCP_Manager::update_io()
         {
             if (mcp_config->get_out_define_state(i))
             {
-                write_output(i, true, 998);
+                write_output(i, true, 998, true);
             }
             else
             {
-                write_output(i, false, 998);
+                write_output(i, false, 998, true);
             }
         }
     }    
@@ -94,7 +94,7 @@ void MCP_Manager::update_io()
                 int out = mcp_config->get_in_output_related(i);
                 if (mcp_config->get_out_enabled(out))
                 {
-                    write_output(out, in_states[i], 998);
+                    write_output(out, in_states[i], 998, false);
                 }
             }
             String topic = "avshrs/devices/switch_array_01/state/in_" + (String)i ;
@@ -119,7 +119,7 @@ void MCP_Manager::scan_all_inputs(){
                 in_states[in] = value;
                 int out = mcp_config->get_in_output_related(in);
                 if (mcp_config->get_in_enabledOutputRelated(in)){
-                    write_output(static_cast<uint8_t>(out), value, in);
+                    write_output(static_cast<uint8_t>(out), value, in, false);
                     
                 }
                 String topic = "avshrs/devices/switch_array_01/state/in_" + (String)in ;
@@ -138,19 +138,19 @@ void MCP_Manager::scan_all_inputs(){
 
 void MCP_Manager::change_state(int output, unsigned int timeout){
     if (!read_output_buffer(output)){
-        write_output(output, true, 999);
+        write_output(output, true, 999, false);
     }
     for(out_states_forced[output] = timeout; out_states_forced[output] > 0 ; out_states_forced[output]--){
         usleep(1000000);
      }
     if (!read_output_buffer(output)){
-        write_output(output, false, 999);
+        write_output(output, false, 999, false);
     }
 }
 
-void MCP_Manager::write_output(int output, bool value, int in = 999){
+void MCP_Manager::write_output(int output, bool value, int in = 999, bool force = false){
     if (mcp_config->get_out_enabled(output)){
-        if (!mcp_config->get_out_bistable(output) && out_states[output] != value){
+        if (!mcp_config->get_out_bistable(output) && (out_states[output] != value || force)){
             out_states[output] = value;
             write_output_direct(output, value);
             if(value > 0)
