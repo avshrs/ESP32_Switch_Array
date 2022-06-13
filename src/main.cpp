@@ -52,7 +52,7 @@ void publish_mqtt_discover()
             }
                 
             
-            String switch_dev_ = make_discover_json("switch", "switch_array_01", "AvsHrs-01", mcp_config.get_out_name(i), mcp_config.get_out_unique_id(i), switch_dev);
+            String switch_dev_ = make_discover_json("switch", "switch_array_01", "Smart_Switch_Array-01", mcp_config.get_out_name(i), mcp_config.get_out_unique_id(i), switch_dev);
             String topic = "homeassistant/" + mcp_config.get_out_dev_group(i) + "/switch_array_01/";
             topic +=  mcp_config.get_out_unique_id(i);
             topic +=  "/config";
