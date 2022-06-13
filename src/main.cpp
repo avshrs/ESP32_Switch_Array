@@ -37,14 +37,16 @@ void publish_mqtt_discover()
     {
         if(mcp_config.get_out_enabled(i))
         {
+            String switch_dev;
             if(mcp_config.get_out_dev_group(i) == "lock")
             {
-                String switch_dev = "\"command_topic\":\"~/set_state/out_"+ (String)i + "\",\"state_topic\":\"~/state/out_"+ (String)i + "\"}";
+                switch_dev = "\"command_topic\":\"~/set_state/out_"+ (String)i + "\",\"state_topic\":\"~/state/out_"+ (String)i ;
+                switch_dev +="\",\"payload_lock\":\"OFF\",\"payload_unlock\":\"ON\",\"state_locked\":\"OFF\",\"state_unlocked\":\"ON\" }";
             }
                 
             else
             {
-                String switch_dev = "\"command_topic\":\"~/set_state/out_"+ (String)i + "\",\"state_topic\":\"~/state/out_"+ (String)i + "\",\"device_class\":\"";
+                switch_dev = "\"command_topic\":\"~/set_state/out_"+ (String)i + "\",\"state_topic\":\"~/state/out_"+ (String)i + "\",\"device_class\":\"";
                 switch_dev += mcp_config.get_out_dev_class(i);
                 switch_dev += "\"}";
             }
@@ -56,7 +58,6 @@ void publish_mqtt_discover()
             topic +=  "/config";
             client.publish(topic.c_str(), switch_dev_.c_str(), true);
         }
-   
     }
 }
 
