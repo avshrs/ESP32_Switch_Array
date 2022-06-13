@@ -7,9 +7,12 @@
 int d = 1; 
 unsigned long previousMillis = 60001;  
 unsigned long previousMillis2 = 600001;  
+
 String state = "n/a";
 MCP_Manager mcp; 
 MCP_CONFIG mcp_config; 
+
+
 String make_discover_json(String dev_type_, String dev_name_, String dev_name_ha, String  sens_name, String  unique_id, String entity_settings)
 {
 String md = (String)"{\"avty\":{\"topic\":\"avshrs/devices/" + (String)dev_name_ ;
@@ -97,11 +100,6 @@ void callback(char* topic, byte* payload, unsigned int length)
         else if (st == "OFF")
             mcp.write_output(int(nr.toInt()), false, 999, false);
     }
-
-    
-    
-
-
 }
 
 void setup() 
@@ -128,8 +126,6 @@ void setup()
 
     reconnect();
 
-    // scan_i2c();
-
     mcp_config.init();
     mcp.register_mcp_config(&mcp_config);
     mcp.register_mqtt_client(&client);
@@ -142,6 +138,35 @@ void setup()
 
 }
 
+void update_statuses()
+{
+    for(int i = 0; i < mcp_config.get_input_len(); i++)    
+    {
+        String topic = "avshrs/devices/switch_array_01/state/in_" + (String)i;
+        if(mcp.read_input_buffer(i) && mcp_config.get_in_enabled(i))
+        {
+            client.publish(topic.c_str(), "ON");
+        }
+        else
+        {
+            client.publish(topic.c_str(), "OFF");
+        }
+    }
+    for(int i = 0; i < mcp_config.get_output_len(); i++)    
+    {
+        String topic = "avshrs/devices/switch_array_01/state/out_" + (String)i;
+
+        if(mcp.read_output_buffer(i) && mcp_config.get_out_enabled(i))
+        {
+            client.publish(topic.c_str(), "ON");
+        }
+        else
+        {
+            client.publish(topic.c_str(), "OFF");
+        }
+    }
+}
+
 
 void loop() 
 {
@@ -150,7 +175,6 @@ void loop()
     if (!client.connected()) 
     {
         reconnect();
-    
     }
     
     if (currentMillis - previousMillis >= 60000) 
@@ -158,7 +182,7 @@ void loop()
         previousMillis = currentMillis;
         wifi_status();
         client.publish("avshrs/devices/switch_array_01/status/connected", "true");
-
+        update_statuses();
     }
     client.loop();
     mcp.scan_all_inputs();

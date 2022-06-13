@@ -66,6 +66,7 @@ struct MCP_IN_CONFIG
     String unique_id;
     String name;
     String dev_class;
+    String dev_group;
     bool enabled;
     bool enabled_output_related;
     uint8_t output_number;

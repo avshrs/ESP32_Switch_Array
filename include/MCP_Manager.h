@@ -10,14 +10,18 @@ class MCP_Manager
 {
     
     private:
+        MCP_CONFIG *mcp_config;
+        PubSubClient *client;
+
         MCP *mcpc_in[9];
+        MCP *mcpc_out[9];
+
         MCP mcpc_in_0;
         MCP mcpc_in_1;
         MCP mcpc_in_2;
         MCP mcpc_in_3;
-        MCP_CONFIG *mcp_config;
-        PubSubClient *client;
-        MCP *mcpc_out[9];
+        
+        
         MCP mcpc_out_0;
         MCP mcpc_out_1;
         MCP mcpc_out_2;
@@ -29,6 +33,7 @@ class MCP_Manager
 
         
         MCP_Data mcp_data;
+
         bool in_states[128] = {true};
         bool out_states_real[128] = {false};
         bool out_states[128] = {false};
@@ -36,21 +41,20 @@ class MCP_Manager
         
     public:
         void MCP_Init();
+        void scan_all_inputs();
+        void update_io();
+        void write_output(int output, bool value, int input, bool force);
+
+        bool read_output_buffer(uint8_t output);
+        bool read_input_buffer(uint8_t input);
 
         bool read_input_direct(uint8_t input);
         void write_output_direct(uint8_t output, bool state);
-        bool read_output_buffer(uint8_t output);
-        bool read_input_buffer(uint8_t input);
-        void scan_all_inputs();
-        void write_output(int output, bool value, int input, bool force);
-        void update_io();
+        
         void register_mcp_config(MCP_CONFIG *config);
         void register_mqtt_client(PubSubClient *client);
         
-        void write_output_timer(int output, unsigned int timeout, bool twilight_force);
-    
     private:
         MCP_Data get_address(uint8_t io);
-        void change_state(int output, unsigned int timeout);
 };
 

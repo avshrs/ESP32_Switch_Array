@@ -21,7 +21,6 @@ uint8_t MCP_i2c::readByte(uint8_t reg, uint8_t mcp_bus, uint8_t address)
 {
 
     uint8_t buf = 0;
-
         if (mcp_bus == 1)
         {   
             Wire.beginTransmission(address);
@@ -29,7 +28,6 @@ uint8_t MCP_i2c::readByte(uint8_t reg, uint8_t mcp_bus, uint8_t address)
             Wire.endTransmission();
             Wire.requestFrom(address, 1);
             return Wire.read();
-
         }
         else if(mcp_bus == 2)
         {
@@ -38,7 +36,6 @@ uint8_t MCP_i2c::readByte(uint8_t reg, uint8_t mcp_bus, uint8_t address)
             Wire1.endTransmission();
             Wire1.requestFrom(address, 1);
             return Wire.read();
-            
         }
         
     
@@ -49,7 +46,6 @@ uint8_t MCP_i2c::readByte(uint8_t reg, uint8_t mcp_bus, uint8_t address)
 
 void MCP_i2c::writeByte(uint8_t reg, uint8_t buf, uint8_t mcp_bus, uint8_t address)
 {
-
         if (mcp_bus == 1)
         {
             Wire.beginTransmission(address);
