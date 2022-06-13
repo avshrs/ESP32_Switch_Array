@@ -63,7 +63,7 @@ void MCP_Manager::register_mqtt_client(PubSubClient *client_)
     client = client_;
 }
 void MCP_Manager::update_io()
-{
+{   
     for(int i=0; i < static_cast<int>(mcp_config->get_output_len());i++)
     {
         if(mcp_config->get_out_enabled(i))
@@ -83,7 +83,8 @@ void MCP_Manager::update_io()
         if(mcp_config->get_in_enabled(i))
         {
             in_states[i] = read_input_direct(i);   
-            // mqtt->pub_in_state(i, in_states[i]);             
+         
+
             if (mcp_config->get_in_enabledOutputRelated(i))
             {
                 int out = mcp_config->get_in_output_related(i);
@@ -92,6 +93,12 @@ void MCP_Manager::update_io()
                     write_output(out, in_states[i], 998);
                 }
             }
+            String topic = "avshrs/devices/switch_array_01/state/in_" + (String)i ;
+            if(in_states[i]>0)
+                client->publish(topic.c_str(), "ON");
+            else
+                client->publish(topic.c_str(), "OFF");
+            
         }
     }    
     
@@ -102,17 +109,21 @@ void MCP_Manager::scan_all_inputs(){
     for(int in = 0; in < static_cast<int>(mcp_config->get_input_len()) ; in++){
         if (mcp_config->get_in_enabled(in)){
             bool value = read_input_direct(in);
+            String on = "ON";
+            String off = "OFF";
             if (in_states[in] != value){
-                
-                String topic = "avshrs/devices/switch_array_01/in_" + (String)in + "/state";
-                String msg = (String)value; 
                 in_states[in] = value;
-                
-                client->publish(topic.c_str(), msg.c_str());
                 int out = mcp_config->get_in_output_related(in);
                 if (mcp_config->get_in_enabledOutputRelated(in)){
                     write_output(static_cast<uint8_t>(out), value, in);
+                    
                 }
+                String topic = "avshrs/devices/switch_array_01/state/in_" + (String)in ;
+                
+                if( value == true)
+                    client->publish(topic.c_str(), on.c_str());
+                else                    
+                    client->publish(topic.c_str(), off.c_str());
             }
         }
         
@@ -135,19 +146,36 @@ void MCP_Manager::change_state(int output, unsigned int timeout){
 
 void MCP_Manager::write_output(int output, bool value, int in = 999){
     if (mcp_config->get_out_enabled(output)){
+        String topic = "avshrs/devices/switch_array_01/state/out_" + (String)output ;
         if (!mcp_config->get_out_bistable(output) && out_states[output] != value){
             out_states[output] = value;
             write_output_direct(output, value);
+            if(value > 0)
+            {
+                client->publish(topic.c_str(), "ON");
+                Serial.println(String("Device nr: "+ (String)output + " triggered by: "+ (String)in + " state: ON" ));
+            }
+            else
+            {
+                client->publish(topic.c_str(), "OFF");
+                Serial.println(String("Device nr: "+ (String)output + " triggered by: "+ (String)in + " state: OFF" ));
+            }
+                
+            
         }
         else if (mcp_config->get_out_bistable(output)){
             if (out_states[output] > 0 && value > 0){
                 
                 out_states[output] = false;
                 write_output_direct(output, false);
+                client->publish(topic.c_str(), "ON");
+                Serial.println(String("Device nr: "+ (String)output + " triggered by: "+ (String)in + " bi state to state: ON" ));
             }
             else if (value > 0){
                 out_states[output] = true;
                 write_output_direct(output, true);
+                client->publish(topic.c_str(), "OFF");
+                Serial.println(String("Device nr: "+ (String)output + " triggered by: "+ (String)in + " bi state to state: OFF" ));
             }
         }
     }
@@ -158,6 +186,8 @@ void MCP_Manager::write_output(int output, bool value, int in = 999){
 bool MCP_Manager::read_input_direct(uint8_t in){
     MCP_Data mcp_data = get_address(in);
     return mcpc_in[mcp_data.chipset]->readRaw(mcp_data.side, mcp_data.io);
+    
+     
 }
 
 bool MCP_Manager::read_output_buffer(uint8_t out){

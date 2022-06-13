@@ -202,10 +202,12 @@ mcp_out_config[85] = {"none", "Elektrozaczep Kojec na Śmieci",                 
 uint8_t MCP_CONFIG::get_input_len()
 {
     return 64;
+    // return 16;
 }
 uint8_t MCP_CONFIG::get_output_len()
 {
     return 128;
+    // return 16;
 }
 
     

@@ -3,6 +3,8 @@
 #include <Arduino.h>
 #include <PubSubClient.h>
 #include <WiFi.h>
+#include <Wire.h>
+
 #include "passwd.h"
 #include "Esp.h"
 EspClass ESP2;
@@ -21,9 +23,76 @@ String IpAddress2String(const IPAddress& ipAddress)
   String(ipAddress[3])  ; 
 }
 
+String HexString2ASCIIString(String hexstring) {
+  String temp = "", sub = "", result;
+  char buf[3];
+  for(int i = 0; i < hexstring.length(); i += 2){
+    sub = hexstring.substring(i, i+2);
+    sub.toCharArray(buf, 3);
+    char b = (char)strtol(buf, 0, 16);
+    if(b == '\0')
+      break;
+    temp += b;
+  }
+  return temp;
+}
 
 unsigned long old_mils = 60000;
 
+void scan_i2c()
+{
+    byte error, address;
+    int nDevices;
+    String msg = "dev: ";
+
+    nDevices = 0;
+    for(address = 30; address < 41; address++ ) 
+    {
+        Wire.beginTransmission(address);
+        error = Wire.endTransmission();
+        if (error == 0) 
+        {
+            msg += " 0x";
+            
+            
+            if (address<16) 
+            {
+                msg += "0";
+            }
+            msg+= String(address, HEX);
+            
+        
+        nDevices++;
+        }
+        
+    }
+    Serial.println(msg.c_str());
+    client.publish("avshrs/devices/switch_array_01/status/i2c1_devices", msg.c_str());
+    error = 0;
+    address = 0;
+    nDevices = 0;
+    msg = "dev: ";
+    for(address = 30; address < 41; address++ ) 
+    {
+        Wire1.beginTransmission(address);
+        error = Wire.endTransmission();
+        if (error == 0) 
+        {
+            msg += " 0x";
+            if (address<16) 
+            {
+                msg += "0";
+            }
+            msg+= String(address, HEX);
+            
+        
+        nDevices++;
+        }
+        
+    }
+    Serial.println(msg.c_str());
+    client.publish("avshrs/devices/switch_array_01/status/i2c2_devices", msg.c_str());
+}
 
 
 
@@ -104,6 +173,7 @@ void wifi_status()
 
 
 }
+
 
 void setup_wifi() 
 {
