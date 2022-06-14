@@ -186,6 +186,4 @@ void loop()
     }
     client.loop();
     mcp.scan_all_inputs();
-    
-    
 }
