@@ -5,6 +5,11 @@
 void MCP::MCP_Init(uint8_t bus, uint8_t MCPADDRESS, uint8_t GIPOA_TYPE, uint8_t GIPOA_PULL, uint8_t GIPOB_TYPE, uint8_t GIPOB_PULL){
     mcpAddress = MCPADDRESS;
     mcp_bus = bus;
+    mcp_gpioa_type = GIPOA_TYPE;
+    mcp_gpioa_pull = GIPOA_PULL;
+    mcp_gpiob_type = GIPOB_TYPE;
+    mcp_gpiob_pull = GIPOB_PULL;
+
     // mcp_i2c.i2c_init(bus, mcpAddress);
 
     mcp_i2c.writeByte(IODIRA, GIPOA_TYPE, mcp_bus,  mcpAddress);   // register 0 is the I/O direction register for Port A
@@ -17,18 +22,40 @@ void MCP::MCP_Init(uint8_t bus, uint8_t MCPADDRESS, uint8_t GIPOA_TYPE, uint8_t 
 
     if (GIPOB_PULL == 0xFF && GIPOB_TYPE == 0xFF){
         mcp_i2c.writeByte(GPPUB, 0xFF, mcp_bus,  mcpAddress);   // register 0 is the I/O direction register for Port A
-        
+    }
+}
+
+void MCP::restart_i2c()
+{
+    mcp_i2c.writeByte(IODIRA, mcp_gpioa_type, mcp_bus,  mcpAddress);   // register 0 is the I/O direction register for Port A
+
+    if (mcp_gpioa_pull == 0xFF && mcp_gpioa_type == 0xFF){
+        mcp_i2c.writeByte(GPPUA, 0xFF, mcp_bus,  mcpAddress);   // register 0 is the I/O direction register for Port A
+    }
+
+    mcp_i2c.writeByte(IODIRB, mcp_gpiob_type, mcp_bus,  mcpAddress);   // register 0 is the I/O direction register for Port A
+
+    if (mcp_gpiob_pull == 0xFF && mcp_gpiob_type == 0xFF){
+        mcp_i2c.writeByte(GPPUB, 0xFF, mcp_bus,  mcpAddress);   // register 0 is the I/O direction register for Port A
     }
 }
 
 bool MCP::readRaw(uint8_t side, uint8_t io_number){
     uint8_t mask = (1 << io_number);
-    uint8_t v = ~(convert_bits(mcp_i2c.readByte(side, mcp_bus,  mcpAddress)));
+    int value = mcp_i2c.readByte(side, mcp_bus,  mcpAddress);
+    if(value >= 0)
+    {
+        uint8_t v = ~(convert_bits((uint8_t)value));
 
-    if ((v & mask) > 0)
-        return true;
+        if ((v & mask) > 0)
+            return true;
+        else
+            return false;
+    }
     else
-        return false;
+    {
+        restart_i2c();
+    }
 }
 
 void MCP::writeRaw(uint8_t side, uint8_t io_number, bool state){

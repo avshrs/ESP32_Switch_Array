@@ -39,62 +39,6 @@ String HexString2ASCIIString(String hexstring) {
 
 unsigned long old_mils = 60000;
 
-void scan_i2c()
-{
-    byte error, address;
-    int nDevices;
-    String msg = "dev: ";
-
-    nDevices = 0;
-    for(address = 30; address < 41; address++ ) 
-    {
-        Wire.beginTransmission(address);
-        error = Wire.endTransmission();
-        if (error == 0) 
-        {
-            msg += " 0x";
-            
-            
-            if (address<16) 
-            {
-                msg += "0";
-            }
-            msg+= String(address, HEX);
-            
-        
-        nDevices++;
-        }
-        
-    }
-    Serial.println(msg.c_str());
-    client.publish("avshrs/devices/switch_array_01/status/i2c1_devices", msg.c_str());
-    error = 0;
-    address = 0;
-    nDevices = 0;
-    msg = "dev: ";
-    for(address = 30; address < 41; address++ ) 
-    {
-        Wire1.beginTransmission(address);
-        error = Wire.endTransmission();
-        if (error == 0) 
-        {
-            msg += " 0x";
-            if (address<16) 
-            {
-                msg += "0";
-            }
-            msg+= String(address, HEX);
-            
-        
-        nDevices++;
-        }
-        
-    }
-    Serial.println(msg.c_str());
-    client.publish("avshrs/devices/switch_array_01/status/i2c2_devices", msg.c_str());
-}
-
-
 
 
 
@@ -152,25 +96,24 @@ void wifi_status()
     snprintf (msg, MSG_BUFFER_SIZE, "%i", signal);
     client.publish("avshrs/devices/switch_array_01/status/wifi_signal_strength", msg);
     
-    client.publish("avshrs/devices/switch_array_01/status/uptime", uptime(currentMillis).c_str());
+    client.publish("avshrs/devices/switch_array_01/status/uptime", uptime(currentMillis).c_str(), true);
 
     snprintf (msg, MSG_BUFFER_SIZE, "%i", ESP2.getFreeHeap());
-    client.publish("avshrs/devices/switch_array_01/status/FreeHeap", msg);
+    client.publish("avshrs/devices/switch_array_01/status/FreeHeap", msg, true);
 
     snprintf (msg, MSG_BUFFER_SIZE, "%i", ESP2.getHeapSize());
-    client.publish("avshrs/devices/switch_array_01/status/HeapSize", msg);
+    client.publish("avshrs/devices/switch_array_01/status/HeapSize", msg, true);
 
     snprintf (msg, MSG_BUFFER_SIZE, "%i", ESP2.getMinFreeHeap());
-    client.publish("avshrs/devices/switch_array_01/status/MinFreeHeap", msg);
+    client.publish("avshrs/devices/switch_array_01/status/MinFreeHeap", msg, true);
 
     snprintf (msg, MSG_BUFFER_SIZE, "%i", ESP2.getMaxAllocHeap());
-    client.publish("avshrs/devices/switch_array_01/status/MaxAllocHeap", msg);
+    client.publish("avshrs/devices/switch_array_01/status/MaxAllocHeap", msg, true);
     
     snprintf (msg, MSG_BUFFER_SIZE, "%i", ESP2.getMaxAllocHeap());
-    client.publish("avshrs/devices/switch_array_01/status/MaxAllocHeap", msg);
+    client.publish("avshrs/devices/switch_array_01/status/MaxAllocHeap", msg, true);
 
-    client.publish("avshrs/devices/switch_array_01/status/ChipModel", ESP2.getChipModel());
-
+    client.publish("avshrs/devices/switch_array_01/status/ChipModel", ESP2.getChipModel(), true);
 
 }
 
@@ -195,4 +138,12 @@ void setup_wifi()
     Serial.println("WiFi connected");
     Serial.println("IP address: ");
     Serial.println(WiFi.localIP());
+}
+void wifi_fast_reconnect() 
+{
+    if(WiFi.status() != WL_CONNECTED)
+    {
+    WiFi.disconnect();
+    WiFi.reconnect();
+    }
 }

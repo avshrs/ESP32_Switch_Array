@@ -143,26 +143,31 @@ void update_statuses()
     for(int i = 0; i < mcp_config.get_input_len(); i++)    
     {
         String topic = "avshrs/devices/switch_array_01/state/in_" + (String)i;
-        if(mcp.read_input_buffer(i) && mcp_config.get_in_enabled(i))
+        if(mcp_config.get_in_enabled(i))
         {
-            client.publish(topic.c_str(), "ON");
-        }
-        else
-        {
-            client.publish(topic.c_str(), "OFF");
+            if(mcp.read_input_buffer(i))
+            {
+                client.publish(topic.c_str(), "ON");
+            }
+            else
+            {
+                client.publish(topic.c_str(), "OFF");
+            }
         }
     }
     for(int i = 0; i < mcp_config.get_output_len(); i++)    
     {
         String topic = "avshrs/devices/switch_array_01/state/out_" + (String)i;
-
-        if(mcp.read_output_buffer(i) && mcp_config.get_out_enabled(i))
+        if(mcp_config.get_out_enabled(i))
         {
-            client.publish(topic.c_str(), "ON");
-        }
-        else
-        {
-            client.publish(topic.c_str(), "OFF");
+            if(mcp.read_output_buffer(i))
+            {
+                client.publish(topic.c_str(), "ON");
+            }
+            else
+            {
+                client.publish(topic.c_str(), "OFF");
+            }
         }
     }
 }
@@ -172,13 +177,14 @@ void loop()
 {
     currentMillis = millis();
     
-    if (!client.connected()) 
-    {
-        reconnect();
-    }
     
     if (currentMillis - previousMillis >= 60000) 
     {
+        wifi_fast_reconnect();
+        if (!client.connected()) 
+        {
+            reconnect();
+        }
         previousMillis = currentMillis;
         wifi_status();
         client.publish("avshrs/devices/switch_array_01/status/connected", "true");

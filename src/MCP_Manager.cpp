@@ -3,8 +3,6 @@
 
 void MCP_Manager::MCP_Init()
 {
-
-    
     char in[] = "in";
     char out[] = "out";
     MCP_I2C_CONFIG in_i2c_1 = {1, in, 0x24};
@@ -23,16 +21,12 @@ void MCP_Manager::MCP_Init()
 
     mcpc_in_0.MCP_Init(in_i2c_1.bus, in_i2c_1.address, MCP_IN, MCP_PULLUP, MCP_IN, MCP_PULLUP);
     mcpc_in[0]= &mcpc_in_0;
-
     mcpc_in_1.MCP_Init(in_i2c_2.bus, in_i2c_2.address, MCP_IN, MCP_PULLUP, MCP_IN, MCP_PULLUP);
     mcpc_in[1]= &mcpc_in_1;
-
     mcpc_in_2.MCP_Init(in_i2c_3.bus, in_i2c_3.address, MCP_IN, MCP_PULLUP, MCP_IN, MCP_PULLUP);
     mcpc_in[2]= &mcpc_in_2;
-
     mcpc_in_3.MCP_Init(in_i2c_4.bus, in_i2c_4.address, MCP_IN, MCP_PULLUP, MCP_IN, MCP_PULLUP);
     mcpc_in[3]= &mcpc_in_3;
-    
 
     mcpc_out_0.MCP_Init(out_i2c_1.bus, out_i2c_1.address, MCP_OUT, MCP_NOT_PULLUP, MCP_OUT, MCP_NOT_PULLUP);
     mcpc_out[0] = &mcpc_out_0;
@@ -131,7 +125,6 @@ void MCP_Manager::scan_all_inputs()
                 
             }
         }
-        
     }
 }
 
