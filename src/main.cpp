@@ -74,9 +74,7 @@ void subscribe_switches()
 
             client.subscribe(topic.c_str());
         }
-   
     }
-
 }
 
 void callback(char* topic, byte* payload, unsigned int length) 
@@ -107,8 +105,9 @@ void setup()
     Serial.begin(1000000);
     int sda2 = 18;
     int scl2 = 19;    
-    int sda = 33;
-    int scl = 32;
+    int sda = 32;
+    int scl = 33;
+    
     Wire.begin(sda, scl);
     Serial.println("I2C 1 bus initialized");
 
@@ -184,6 +183,7 @@ void loop()
         if (!client.connected()) 
         {
             reconnect();
+            subscribe_switches();
         }
         previousMillis = currentMillis;
         wifi_status();

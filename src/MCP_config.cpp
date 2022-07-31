@@ -7,16 +7,16 @@
 
 void MCP_CONFIG::init()
 {
-mcp_in_config[0] = {"light_dzienny_wlacznik", "Pokój Dzienny", "light", "binary_sensor", 1, 1, 0};
-mcp_in_config[1] = {"none", "none", "none", "none", 0, 0, 0};
-mcp_in_config[2] = {"light_dzieciakow_wlacznik", "Pokój Dzieciaków", "light", "binary_sensor", 1, 1, 1};
-mcp_in_config[3] = {"none", "none", "none", "none",   0, 0, 0};
-mcp_in_config[4] = {"light_goscinny_wlacznik", "Pokój Gościnny", "light", "binary_sensor", 1, 1, 2};
-mcp_in_config[5] = {"none", "none", "none", "none",   0, 0, 0};
-mcp_in_config[6] = {"light_sypialnia1_wlacznik", "Sypialnia male","light", "binary_sensor", 1, 1, 3};
-mcp_in_config[7] = {"light_sypialnia2_wlacznik", "Sypialnia duże","light", "binary_sensor", 1, 1, 4};
-mcp_in_config[8] = {"light_garderoba_wlacznik", "Garderoba","light", "binary_sensor", 1, 1, 5};
-mcp_in_config[9] = {"none", "none","none", "none",   0, 0, 0};
+mcp_in_config[0] =  {"light_dzienny_wlacznik", "Pokój Dzienny", "light", "binary_sensor", 1, 1, 0};
+mcp_in_config[1] =  {"none", "none", "none", "none", 0, 0, 0};
+mcp_in_config[2] =  {"light_dzieciakow_wlacznik", "Pokój Dzieciaków", "light", "binary_sensor", 1, 1, 1};
+mcp_in_config[3] =  {"none", "none", "none", "none",   0, 0, 0};
+mcp_in_config[4] =  {"light_goscinny_wlacznik", "Pokój Gościnny", "light", "binary_sensor", 1, 1, 2};
+mcp_in_config[5] =  {"none", "none", "none", "none",   0, 0, 0};
+mcp_in_config[6] =  {"light_sypialnia1_wlacznik", "Sypialnia male","light", "binary_sensor", 1, 1, 3};
+mcp_in_config[7] =  {"light_sypialnia2_wlacznik", "Sypialnia duże","light", "binary_sensor", 1, 1, 4};
+mcp_in_config[8] =  {"light_garderoba_wlacznik", "Garderoba","light", "binary_sensor", 1, 1, 5};
+mcp_in_config[9] =  {"none", "none","none", "none",   0, 0, 0};
 mcp_in_config[10] = {"light_lazienka_pietro_wlacznik", "Łazienka Piętro","light", "binary_sensor", 1, 1, 6};
 mcp_in_config[11] = {"none", "none","none", "none",   0, 0, 0};
 mcp_in_config[12] = {"light_srtych_wlacznik", "Strych",                          "light", "binary_sensor",1, 1, 7};
@@ -28,7 +28,7 @@ mcp_in_config[17] = {"none", "none",         "none", "none",   0, 0, 0};
 mcp_in_config[18] = {"light_schody_parter_wlacznik", "Schody Parter",           "light", "binary_sensor",   1, 1, 9};
 mcp_in_config[19] = {"none", "none",         "none", "none",   0, 0, 0};
 mcp_in_config[20] = {"light_wiatrolap_wlacznik", "Wiatrołap",                   "light", "binary_sensor",   1, 1, 11};
-mcp_in_config[21] = {"none", "none",         "none", "none",   0, 0, 0};
+mcp_in_config[21] = {"opening_klawisz_wiatrolap", "Wiatrołap Klawisz Bramka",    "opening",  "binary_sensor",   1, 0, 0};
 mcp_in_config[22] = {"light_salon_kom1_wlacznik", "Salon Komunikacyjne małe",   "light", "binary_sensor",   1, 1, 12};
 mcp_in_config[23] = {"light_salon_kom2_wlacznik", "Salon Komunikacyjne duże",   "light", "binary_sensor",   1, 1, 13};
 mcp_in_config[24] = {"light_salon_glowne_wlacznik", "Salon Główne",             "light", "binary_sensor",   1, 1, 14};

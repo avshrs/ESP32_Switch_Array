@@ -15,6 +15,7 @@ unsigned long currentMillis;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
+
 String IpAddress2String(const IPAddress& ipAddress)
 {
   return String(ipAddress[0]) + String(".") +\
@@ -61,7 +62,7 @@ void reconnect()
             {
                 Serial.println("connected to MQTT server");
                 // MQTT subscription
-
+                // subscribe_switches();
                 // prepare_conf();
 
             } 
